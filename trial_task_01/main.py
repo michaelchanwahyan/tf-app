@@ -31,8 +31,8 @@ _ = os.system('clear')
 
 model = keras.Sequential(
     [
-        layers.Dense(3, input_dim=2, activation="sigmoid", name="layer1"),
-        layers.Dense(2, input_dim=3, activation="sigmoid", name="layer2"),
+        layers.Dense(3, input_shape=(2,), activation="sigmoid", name="layer1"),
+        layers.Dense(2, input_shape=(3,), activation="sigmoid", name="layer2"),
     ]
 )
 # Call model on a test input
