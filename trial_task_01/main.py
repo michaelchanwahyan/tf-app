@@ -3,7 +3,24 @@ import tensorflow as tf
 import keras
 from keras import layers
 
-# Define Sequential model with 3 layers
+# Define Sequential model with 2 layers
+#
+#  INPUT LAYER          LAYER 1           LAYER 2
+#                  ------ [] ------------
+#                 /                      \
+#           ------                        []  ->
+#          /                             /
+#    ->  [] ------------     /-----------
+#                        \  /
+#                         []
+#                        /  \
+#    ->  [] ------------     \-----------
+#          \                             \
+#           ------                        []  ->
+#                 \                      /
+#                  ------ [] ------------
+#
+
 model = keras.Sequential(
     [
         layers.Dense(3, input_dim=2, activation="relu", name="layer1"),
