@@ -84,7 +84,7 @@ model.compile(
 )
 
 BATCH_SIZE    = 128
-EPOCHS        = 10
+EPOCHS        = 40
 
 # ----------------------------------------
 # MODEL FITTING
