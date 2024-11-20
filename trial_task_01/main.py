@@ -1,7 +1,10 @@
 #!/usr/loca/bin/python3
+import os
 import tensorflow as tf
 import keras
 from keras import layers
+
+_ = os.system('clear')
 
 # Define Sequential model with 2 layers
 #
@@ -31,6 +34,6 @@ model = keras.Sequential(
 #x = tf.ones((1, 2))
 #y = model(x)
 
-print(model.weights)
+#print(model.weights)
 print(model.summary())
 
