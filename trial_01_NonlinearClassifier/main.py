@@ -1,5 +1,6 @@
 #!/usr/loca/bin/python3
 import os
+from datetime import datetime as datetime
 import numpy as np
 import tensorflow as tf
 import keras
@@ -145,4 +146,7 @@ if __name__ == "__main__":
                           [0.7, 0.7]])
     prediction = model.predict(x_predict)
     print(x_predict, prediction)
+
+    timestamp_str = datetime.now().strftime('%Y%m%d%H%M%S')
+    model.save('./model_' + timestamp_str + '.keras')
 
