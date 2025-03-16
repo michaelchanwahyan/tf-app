@@ -45,7 +45,7 @@ sampleFreq = 16000
 # 1. Normalization:
 # Transform your int_16 samples into floating-point values between -1 and 1.
 # This step is crucial for neural network training.
-def data_normalization(inputFrame):
+def normalization_layer(inputFrame):
     normalizedFrame = inputFrame / 32768.0
     return normalizedFrame
 
@@ -62,20 +62,30 @@ def data_normalization(inputFrame):
 # to effectively detect the 200Hz signal
 
 # 1. FFT:
-def data_fft(inputData):
-    # Apply FFT to convert time-domain audio data into frequency-domain
-    # representations
-    fftData = np.fft.fft(inputData)
-    # Focus on the frequency bin corresponding to 200Hz:
-    freqBinIdx = int(200 * frameSize / sampleFreq)
-    amplitude_200Hz = np.abs(fftData[freqBinIdx])
-    return fftData
+# Apply FFT to convert time-domain audio data into frequency-domain representations
+class FFTLayer(layers.Layer):
+    def __init__(self, frameSize):
+        super(FFTLayer, self).__init__()
+        self.frameSize = frameSize
+
+    def call(self, inputs):
+        fft_data = tf.signal.fft(tf.cast(inputs, tf.complex64))
+        return tf.abs(fft_data)
+
+fft_layer = FFTLayer(frameSize)
 
 # 2. Power Spectral Density (PSD):
-def data_psd(inputData):
-    # Compute the PSD for better frequency resolution and noise reduction
-    psd = np.abs(inputData)**2 / len(inputData)
-    return psd
+# Compute the PSD for better frequency resolution and noise reduction
+class PSDLayer(layers.Layer):
+    def __init__(self, frameSize):
+        super(PSDLayer, self).__init__()
+        self.frameSize = frameSize
+
+    def call(self, inputs):
+        psd = tf.square(inputs) / self.frameSize
+        return psd
+
+psd_layer = PSDLayer(frameSize)
 
 
 # -------------------------------------------------
@@ -88,8 +98,13 @@ def data_psd(inputData):
 # Use a simple feedforward neural network for feature extraction and
 # classification
 def get_uncompiled_model():
+    input_shape = (frameSize,)
     model = keras.Sequential(
         [
+            layers.Input(shape=input_shape),
+            layers.Lambda(normalization_layer),
+            FFTLayer(frameSize),
+            PSDLayer(frameSize),
             layers.Dense(128, activation='relu', input_shape=(frameSize,)),
             layers.Dense(64, activation='relu'),
             layers.Dense(1, activation='sigmoid'),
@@ -183,8 +198,8 @@ if __name__ == "__main__":
     # ----------------------------------------
     # DEFINE MODEL TRAINING PARAMS
     # ----------------------------------------
-    BATCH_SIZE    = 128
-    EPOCHS        = 40
+    BATCH_SIZE    = 16
+    EPOCHS        = 100
 
 
     # ----------------------------------------
@@ -195,7 +210,7 @@ if __name__ == "__main__":
         y_train,
         batch_size       = BATCH_SIZE,
         epochs           = EPOCHS,
-        validation_split = 0.1
+        validation_split = 0.2
     )
 
 
