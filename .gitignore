@@ -1,0 +1,5 @@
+*.keras
+*.txt
+logs
+model_checkpoint
+
