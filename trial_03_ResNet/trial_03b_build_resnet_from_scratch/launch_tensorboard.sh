@@ -1,3 +1,3 @@
 #!/bin/bash
-tensorboard --logdirs logs
+tensorboard --logdir logs --bind_all
 
