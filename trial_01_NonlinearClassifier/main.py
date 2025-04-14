@@ -3,6 +3,7 @@ import os
 from datetime import datetime as datetime
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 import keras
 from keras import layers
 
@@ -28,8 +29,9 @@ def get_uncompiled_model():
 
     model = keras.Sequential(
         [
-            layers.Dense(3, input_shape=(2,), activation="sigmoid", name="layer1"),
-            layers.Dense(2, input_shape=(3,), activation="sigmoid", name="layer2"),
+            layers.Input(shape=(2,)),
+            layers.Dense(3, activation="tanh", name="layer1"),
+            layers.Dense(2, activation="tanh", name="layer2"),
         ]
     )
     # Call model on a test input
@@ -43,8 +45,8 @@ def get_uncompiled_model():
 
 def get_compiled_model(model):
     model.compile(
-        loss         = keras.losses.CategoricalCrossentropy(),
-        optimizer    = keras.optimizers.Adam(learning_rate=1e-3),
+        loss         = 'mse',
+        optimizer    = 'adam',
         metrics      = ["accuracy"]
     )
     return model
@@ -65,8 +67,8 @@ def gen_training_data_xy(
     #        REGION     |    REGION
     #        SYMBOL     |    SYMBOL
     #      [ +1 , -1 ]     [ -1 , +1 ]
-    x1         = np.random.rand(SAMPLE_NUM) # generate (0.5, ~N) distribution samples within [0, +1]
-    x2         = np.random.rand(SAMPLE_NUM) # generate (0.5, ~N) distribution samples within [0, +1]
+    x1         = np.random.rand(SAMPLE_NUM) - 0.5 # generate (0.5, ~N) distribution samples within [0, +1]
+    x2         = np.random.rand(SAMPLE_NUM) - 0.5 # generate (0.5, ~N) distribution samples within [0, +1]
     x_train    = np.array(
         [ [_1, _2] for _1, _2 in zip(x1, x2) ]
     )
@@ -74,7 +76,7 @@ def gen_training_data_xy(
         print(x_train)
     y_train    = np.array(
         [
-            [+1,  0] if x_train_curr[0] >= 0.5 and x_train_curr[1] >= 0.5 else [ 0, +1] for x_train_curr in x_train
+            [+1, -1] if x_train_curr[0]*x_train_curr[1] >= 0.0 else [-1, +1] for x_train_curr in x_train
         ]
     )
     if verbose:
@@ -88,6 +90,28 @@ def gen_testing_data_xy(
     ):
     x_test, y_test = gen_training_data_xy(sample_num, verbose)
     return x_test, y_test
+
+
+def get_tsb_ckp_cbk():
+    # Load Tensorboard callback
+    tensorboard = TensorBoard(
+      log_dir=os.path.join(os.getcwd(), "logs"),
+      histogram_freq=1,
+      write_images=True
+    )
+
+    # Save a model checkpoint after every epoch
+    checkpoint = ModelCheckpoint(
+        os.path.join(os.getcwd(), "model_checkpoint"),
+        save_freq="epoch"
+    )
+
+    # Add callbacks to list
+    callbacks = [
+      tensorboard,
+      checkpoint
+    ]
+    return callbacks
 
 
 if __name__ == "__main__":
@@ -111,8 +135,12 @@ if __name__ == "__main__":
     # ----------------------------------------
     # TRAINING DATA GENERATION
     # ----------------------------------------
-    SAMPLE_NUM = 12800
+    SAMPLE_NUM = 128000
     x_train, y_train = gen_training_data_xy(SAMPLE_NUM)
+    print('x train mean:',x_train.mean(axis=0))
+    print('y train mean:',y_train.mean(axis=0))
+    print('x train std:',x_train.std(axis=0))
+    print('y train std:',y_train.std(axis=0))
 
 
     # ----------------------------------------
@@ -128,6 +156,7 @@ if __name__ == "__main__":
     model.fit(
         x_train,
         y_train,
+        callbacks        = get_tsb_ckp_cbk(),
         batch_size       = BATCH_SIZE,
         epochs           = EPOCHS,
         validation_split = 0.1
@@ -142,11 +171,14 @@ if __name__ == "__main__":
     print("test loss, test acc:", results)
 
 
-    x_predict = np.array([[0.3, 0.3],
-                          [0.7, 0.7]])
+    x_predict = np.array([[-0.5,-0.5],
+                          [ 0.5,-0.5],
+                          [-0.5, 0.5],
+                          [ 0.5, 0.5]])
     prediction = model.predict(x_predict)
     print(x_predict, prediction)
 
     timestamp_str = datetime.now().strftime('%Y%m%d%H%M%S')
-    model.save('./model_' + timestamp_str + '.keras')
+    #model.save('./model_' + timestamp_str + '.keras')
+    tf.saved_model.save(model, './model_' + timestamp_str + '/model')
 
