@@ -1,5 +1,9 @@
 *.keras
 *.txt
+*.tflite
+*.pb
+*.index
+*data-*-of-*
 logs
 model_checkpoint
 
