@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.utils import shuffle
 import random
 import tensorflow as tf
+from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 import keras
 from keras import layers
 
@@ -119,7 +120,7 @@ def get_uncompiled_model():
 # Binary cross-entropy is suitable for this binary classification problem
 def get_compiled_model(model):
     model.compile(
-        loss         = 'binary_crossentropy',
+        loss         = 'mse',
         optimizer    = 'adam',
         metrics      = ["accuracy"]
     )
@@ -172,6 +173,28 @@ def gen_testing_data(sampleNum):
     return x_test, y_test
 
 
+def get_tsb_ckp_cbk():
+    # Load Tensorboard callback
+    tensorboard = TensorBoard(
+      log_dir=os.path.join(os.getcwd(), "logs"),
+      histogram_freq=1,
+      write_images=True
+    )
+
+    # Save a model checkpoint after every epoch
+    checkpoint = ModelCheckpoint(
+        os.path.join(os.getcwd(), "model_checkpoint"),
+        save_freq="epoch"
+    )
+
+    # Add callbacks to list
+    callbacks = [
+      tensorboard,
+      checkpoint
+    ]
+    return callbacks
+
+
 if __name__ == "__main__":
     _ = os.system('clear')
 
@@ -208,6 +231,7 @@ if __name__ == "__main__":
     model.fit(
         x_train,
         y_train,
+        callbacks        = get_tsb_ckp_cbk(),
         batch_size       = BATCH_SIZE,
         epochs           = EPOCHS,
         validation_split = 0.2
@@ -217,7 +241,7 @@ if __name__ == "__main__":
     # ----------------------------------------
     # MODEL EVALUATION
     # ----------------------------------------
-    x_test, y_test = gen_testing_data(500)
+    x_test, y_test = gen_testing_data(5000)
     results = model.evaluate(x_test, y_test, )
     print("test loss, test acc:", results)
 
