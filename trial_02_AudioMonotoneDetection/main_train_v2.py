@@ -64,29 +64,15 @@ def normalization_layer(inputFrame):
 
 # 1. FFT:
 # Apply FFT to convert time-domain audio data into frequency-domain representations
-class FFTLayer(layers.Layer):
-    def __init__(self, frameSize):
-        super(FFTLayer, self).__init__()
-        self.frameSize = frameSize
-
-    def call(self, inputs):
-        fft_data = tf.signal.fft(tf.cast(inputs, tf.complex64))
-        return tf.abs(fft_data)
-
-fft_layer = FFTLayer(frameSize)
+def fft_layer(inputFrame):
+    fftFrame = tf.signal.fft(tf.cast(inputFrame, tf.complex64))
+    return tf.abs(fftFrame)
 
 # 2. Power Spectral Density (PSD):
 # Compute the PSD for better frequency resolution and noise reduction
-class PSDLayer(layers.Layer):
-    def __init__(self, frameSize):
-        super(PSDLayer, self).__init__()
-        self.frameSize = frameSize
-
-    def call(self, inputs):
-        psd = tf.square(inputs) / self.frameSize
-        return psd
-
-psd_layer = PSDLayer(frameSize)
+def psd_layer(inputFrame):
+    psdFrame = tf.square(inputFrame) / frameSize
+    return psdFrame
 
 
 # -------------------------------------------------
@@ -104,8 +90,8 @@ def get_uncompiled_model():
         [
             layers.Input(shape=input_shape),
             layers.Lambda(normalization_layer),
-            # FFTLayer(frameSize),
-            # PSDLayer(frameSize),
+            layers.Lambda(fft_layer),
+            layers.Lambda(psd_layer),
             layers.Dense(128, activation='relu', input_shape=(frameSize,)),
             layers.Dense(64, activation='relu'),
             layers.Dense(1, activation='sigmoid'),
@@ -222,7 +208,7 @@ if __name__ == "__main__":
     # DEFINE MODEL TRAINING PARAMS
     # ----------------------------------------
     BATCH_SIZE    = 16
-    EPOCHS        = 25
+    EPOCHS        = 50
 
 
     # ----------------------------------------
