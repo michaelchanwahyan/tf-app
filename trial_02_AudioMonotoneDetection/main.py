@@ -246,5 +246,6 @@ if __name__ == "__main__":
     print("test loss, test acc:", results)
 
     timestamp_str = datetime.now().strftime('%Y%m%d%H%M%S')
-    model.save('./model_' + timestamp_str + '.keras')
+    #model.save('./model_' + timestamp_str + '.keras')
+    tf.saved_model.save(model, './model_' + timestamp_str + '/model')
 

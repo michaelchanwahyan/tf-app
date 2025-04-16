@@ -4,6 +4,8 @@
 *.pb
 *.index
 *data-*-of-*
+*.pkl
 logs
 model_checkpoint
+.venv
 

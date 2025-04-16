@@ -1,6 +1,7 @@
 #!/usr/loca/bin/python3
 import os
 import sys
+import pickle as pkl
 from datetime import datetime as datetime
 import numpy as np
 import tensorflow as tf
@@ -60,5 +61,9 @@ if __name__ == "__main__":
             coord_test
         )
     )[output_layer_name]
+    RES = np.array(res)
+    print(RES)
+    with open('RES.pkl', 'wb') as fp:
+        pkl.dump(RES, fp)
 
 
