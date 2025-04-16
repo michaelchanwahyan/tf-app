@@ -208,7 +208,7 @@ if __name__ == "__main__":
     # DEFINE MODEL TRAINING PARAMS
     # ----------------------------------------
     BATCH_SIZE    = 16
-    EPOCHS        = 50
+    EPOCHS        = 100
 
 
     # ----------------------------------------
