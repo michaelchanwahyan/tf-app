@@ -89,9 +89,9 @@ def get_uncompiled_model():
     model = keras.Sequential(
         [
             layers.Input(shape=input_shape),
-            layers.Lambda(normalization_layer),
-            layers.Lambda(fft_layer),
-            layers.Lambda(psd_layer),
+#            layers.Lambda(normalization_layer),
+#            layers.Lambda(fft_layer),
+#            layers.Lambda(psd_layer),
             layers.Dense(128, activation='relu', input_shape=(frameSize,)),
             layers.Dense(64, activation='relu'),
             layers.Dense(1, activation='sigmoid'),
@@ -140,7 +140,7 @@ def gen_training_data(sampleNum):
     with open('signals_monotone200Hz.txt', 'r') as fp:
         lines = [ _.strip() for _ in fp.readlines() ]
 
-    # randomly sample sampleNum / 2 entries from background data
+    # randomly sample sampleNum / 2 entries from signal data
     randSampleIdx_signal = random.sample(range(len(lines)), int(sampleNum/2))
 
     for randIdx in randSampleIdx_signal:
@@ -202,6 +202,8 @@ if __name__ == "__main__":
     # ----------------------------------------
     SAMPLE_NUM = 5000
     x_train, y_train = gen_training_data(SAMPLE_NUM)
+    x_train_normalized = x_train / 32768.0
+    x_train_fftpsd = np.square(np.abs(np.fft.fft(x_train_normalized, axis=1))) / frameSize
 
 
     # ----------------------------------------
@@ -215,7 +217,8 @@ if __name__ == "__main__":
     # MODEL FITTING
     # ----------------------------------------
     model.fit(
-        x_train,
+#        x_train,
+        x_train_fftpsd,
         y_train,
         callbacks        = get_tsb_ckp_cbk(),
         batch_size       = BATCH_SIZE,
