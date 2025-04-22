@@ -15,8 +15,34 @@ import tensorflow as tf
 if __name__ == "__main__":
     _ = os.system('clear')
     if len(sys.argv) == 1:
-        print('no trained model pathfile specified ...')
-        print('exit ...')
+        print(
+'''
+NAME
+     main_convert_model.py - convert tensorflow ("tf") PC-trained model to ARM-based
+                             embedded format, with optional quantization control
+
+SYNOPSIS
+     main_convert_model.py    [tf model path-file-name]    [optional argument]
+
+DESCRIPTION
+     PC-trained tf model may have 4 ways of model conversion.
+         A) post-training float16 quantization
+                >    no data is needed,
+                >    size reduction up to 50%
+         B) post-training dynamic range quantization
+                >    no data is needed,
+                >    size reduction up to 75%
+         C) post-training integer quantization
+                >    unlabelled representative sample is needed,
+                >    size reduction up to 75%
+         D) quantization-aware training
+                >    labelled training data is needed,
+                >    size reduction up to 75%
+
+     to provide post-training quantization type (i.e. type A)-C)) info,
+     specify "FLOAT16" or "DYNAMIC" or "INT8" as the 2nd input argument
+'''
+        )
         exit()
 
     if len(sys.argv) >= 2:
@@ -26,8 +52,21 @@ if __name__ == "__main__":
             print('exit ...')
             exit()
 
+    if len(sys.argv) >= 3:
+        quant_opt = sys.argv[2]
+        if \
+                not quant_opt.lower() == 'float16' \
+                and \
+                not quant_opt.lower() == 'dynamic' \
+                and \
+                not quant_opt.lower() == 'int8' :
+            print(f'specified quantization option {quant_opt} is not supported !')
+            print('exit ...')
+            exit()
+
+
     # Convert the model
-    saved_model_dir = model_pathfile #f'../trial_02_AudioMonotoneDetection/{model_serial}/model'
+    saved_model_dir = model_pathfile
     print(os.path.exists(saved_model_dir))
     converter = tf.lite.TFLiteConverter.from_saved_model(
             saved_model_dir
