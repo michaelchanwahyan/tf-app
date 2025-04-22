@@ -24,10 +24,11 @@ __DYRNG__       = 'dynamic'
 __INT8__        = 'int8'
 __FULLINT8__    = 'fullint8'
 
-__REPRESENT_DATA_TRAIN_PATHFILE__ = './representative_data_train.pkl'
-__REPRESENT_DATA_NUM__            = 1
-__REPRESENT_SAMPLE_RATE__         = 0.01
+data_train  = './representative_data_train.pkl'
+data_num    = 1
+sample_rate = 0.01
 
+representative_data_exception = []
 
 # -----------------------------------------------------------------------------
 # GLOBAL PARAMETERS
@@ -75,7 +76,13 @@ def func_representative_data_gen():
     randSampleIdx = random.sample(range(data_num), sampleNum)
     for idx in randSampleIdx:
         # Model has only one input so each data point has one element.
-        yield [data_train[idx]]
+        data_curr = data_train[idx]
+        if isinstance(data_curr, str):
+            representative_data_exception.append(data_curr)
+            continue
+        data_curr = tf.cast(data_curr, tf.float32)
+        data_curr = tf.expand_dims(data_curr, 0)
+        yield [data_curr]
 
 
 def func_obtain_representative_data():
@@ -92,6 +99,8 @@ def func_obtain_representative_data():
             print('exit ...')
             exit()
         # recall:    data_train is a list of training data item
+        print(data_train[0])
+        print(data_train[10])
         data_num = data_train.shape[0]
         # recall:    data_num is the number of data itmem in data_train 
         #            it should equal to data_train.shape[0]
@@ -259,3 +268,4 @@ DESCRIPTION
     with open(tfmodel_tobesaved, 'wb') as f:
       f.write(tflite_model)
 
+    print(representative_data_exception)
