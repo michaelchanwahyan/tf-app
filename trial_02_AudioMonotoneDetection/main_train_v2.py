@@ -1,5 +1,6 @@
 #!/usr/loca/bin/python3
 import os
+import pickle as pkl
 from datetime import datetime as datetime
 import numpy as np
 from sklearn.utils import shuffle
@@ -159,6 +160,14 @@ def gen_testing_data(sampleNum):
     return x_test, y_test
 
 
+def save_pickle_unlabelled_representative_data(data_train, output_filename):
+    if os.path.exists(output_filename):
+        print(f'remove existing {output_filename} ...')
+    with open(output_filename, 'wb') as fp:
+        pkl.dump(data_train, fp)
+    return
+
+
 def get_tsb_ckp_cbk():
     # Load Tensorboard callback
     tensorboard = TensorBoard(
@@ -204,6 +213,13 @@ if __name__ == "__main__":
     x_train, y_train = gen_training_data(SAMPLE_NUM)
     x_train_normalized = x_train / 32768.0
     x_train_fftpsd = np.square(np.abs(np.fft.fft(x_train_normalized, axis=1))) / frameSize
+
+
+    # ----------------------------------------
+    # ADD DUMP REPRESENTATIVE DATA
+    # ----------------------------------------
+    output_data_train_filename = './representative_data.pkl'
+    save_pickle_unlabelled_representative_data(x_train_fftpsd, output_data_train_filename)
 
 
     # ----------------------------------------
