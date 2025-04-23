@@ -207,6 +207,10 @@ DESCRIPTION
         if quant_opt == __FLT16__:
             converter.target_spec.supported_types = [tf.float16]
         # -----------------------------
+        # case of    dynamic
+        if quant_opt == __DYRNG__:
+            pass
+        # -----------------------------
         # case of    integer 8
         elif quant_opt == __INT8__:
             func_obtain_representative_data()
