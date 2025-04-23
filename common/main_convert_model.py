@@ -252,7 +252,8 @@ DESCRIPTION
     # Observe tflite converted model if quantization is specified
     # -------------------------------------------------------------------------
     if quant_opt != __NOQNT__:
-        if quant_opt == __INT8__:
+        if quant_opt == __INT8__ \
+        or quant_opt == __FULLINT8__ :
             interpreter = tf.lite.Interpreter(model_content = tflite_model)
             input_type = interpreter.get_input_details()[0]['dtype']
             output_type = interpreter.get_output_details()[0]['dtype']
