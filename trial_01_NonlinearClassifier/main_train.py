@@ -1,5 +1,6 @@
 #!/usr/loca/bin/python3
 import os
+import pickle as pkl
 from datetime import datetime as datetime
 import numpy as np
 import tensorflow as tf
@@ -114,6 +115,14 @@ def get_tsb_ckp_cbk():
     return callbacks
 
 
+def save_pickle_unlabelled_representative_data(data_train, output_filename):
+    if os.path.exists(output_filename):
+        print(f'remove existing {output_filename} ...')
+    with open(output_filename, 'wb') as fp:
+        pkl.dump(data_train, fp)
+    return
+
+
 if __name__ == "__main__":
     _ = os.system('clear')
 
@@ -141,6 +150,13 @@ if __name__ == "__main__":
     print('y train mean:',y_train.mean(axis=0))
     print('x train std:',x_train.std(axis=0))
     print('y train std:',y_train.std(axis=0))
+
+
+    # ----------------------------------------
+    # ADD DUMP REPRESENTATIVE DATA
+    # ----------------------------------------
+    output_data_train_filename = './representative_data.pkl'
+    save_pickle_unlabelled_representative_data(x_train, output_data_train_filename)
 
 
     # ----------------------------------------
