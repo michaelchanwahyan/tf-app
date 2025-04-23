@@ -80,6 +80,7 @@ def func_representative_data_gen():
         if isinstance(data_curr, str):
             representative_data_exception.append(data_curr)
             continue
+        data_curr = tf.data.Dataset.from_tensor_slice(data_curr).batch(1).take(1)
         data_curr = tf.cast(data_curr, tf.float32)
         data_curr = tf.expand_dims(data_curr, 0)
         yield [data_curr]
