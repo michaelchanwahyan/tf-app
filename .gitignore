@@ -8,4 +8,6 @@
 logs
 model_checkpoint
 .venv
+run.sh
+temp.sh
 
