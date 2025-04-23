@@ -80,7 +80,6 @@ def func_representative_data_gen():
         if isinstance(data_curr, str):
             representative_data_exception.append(data_curr)
             continue
-        data_curr = tf.data.Dataset.from_tensor_slice(data_curr).batch(1).take(1)
         data_curr = tf.cast(data_curr, tf.float32)
         data_curr = tf.expand_dims(data_curr, 0)
         yield [data_curr]
@@ -110,7 +109,7 @@ def func_obtain_representative_data():
         print('representative data is not provided ...')
         print('exit ...')
         exit()
-    return
+    return data_train, data_num, sample_rate
 
 
 if __name__ == "__main__":
@@ -208,12 +207,13 @@ DESCRIPTION
             converter.target_spec.supported_types = [tf.float16]
         # -----------------------------
         # case of    dynamic
-        if quant_opt == __DYRNG__:
+        elif quant_opt == __DYRNG__:
             pass
         # -----------------------------
         # case of    integer 8
         elif quant_opt == __INT8__:
-            func_obtain_representative_data()
+            data_train, data_num, sample_rate = func_obtain_representative_data()
+            print('@ line217 ', type(data_train))
             # -------------------------------------------------------------
             # provide the function argument for yielding
             # representative (unlabelled) training data
@@ -221,7 +221,7 @@ DESCRIPTION
         # -----------------------------
         # case of    full integer 8
         elif quant_opt == __FULLINT8__:
-            func_obtain_representative_data()
+            data_train, data_num, sample_rate = func_obtain_representative_data()
             # -------------------------------------------------------------
             # provide the function argument for yielding
             # representative (unlabelled) training data
@@ -232,6 +232,7 @@ DESCRIPTION
             converter.inference_input_type = tf.uint8
             converter.inference_output_type = tf.uint8
         else:
+            print(f'quant_opt given is {quant_opt}, not supported ...')
             print('quant_opt error ...')
             print('exit ...')
             exit()
