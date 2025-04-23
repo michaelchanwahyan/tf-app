@@ -213,11 +213,12 @@ DESCRIPTION
         # case of    integer 8
         elif quant_opt == __INT8__:
             data_train, data_num, sample_rate = func_obtain_representative_data()
-            print('@ line217 ', type(data_train))
             # -------------------------------------------------------------
             # provide the function argument for yielding
             # representative (unlabelled) training data
             converter.representative_dataset = func_representative_data_gen
+            # ensure if any ops cannot be quantized, the converter throws an error
+            converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
         # -----------------------------
         # case of    full integer 8
         elif quant_opt == __FULLINT8__:
@@ -228,6 +229,10 @@ DESCRIPTION
             converter.representative_dataset = func_representative_data_gen
             # ensure if any ops cannot be quantized, the converter throws an error
             converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+            # may consider using
+            #    [tf.lite.OpsSet.EXPERIMENTAL_TFLITE_BUILTINS_ACTIVATIONS_INT16_WEIGHTS_INT8]
+            #    reason : node value and weights are INT8, their product may arise to INT16
+            #    the above type may be fit for 16x8 operation
             # set input and output tensors to uint8
             converter.inference_input_type = tf.uint8
             converter.inference_output_type = tf.uint8
