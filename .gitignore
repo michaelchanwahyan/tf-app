@@ -5,6 +5,7 @@
 *.index
 *data-*-of-*
 *.pkl
+*.wav
 logs
 model_checkpoint
 .venv
