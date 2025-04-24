@@ -247,7 +247,9 @@ if __name__ == "__main__":
     # MODEL EVALUATION
     # ----------------------------------------
     x_test, y_test = gen_testing_data(5000)
-    results = model.evaluate(x_test, y_test, )
+    x_test_normalized = x_test / 32768.0
+    x_test_fftpsd = np.square(np.abs(np.fft.fft(x_test_normalized, axis=1))) / frameSize
+    results = model.evaluate(x_test_fftpsd, y_test, )
     print("test loss, test acc:", results)
 
     timestamp_str = datetime.now().strftime('%Y%m%d%H%M%S')
