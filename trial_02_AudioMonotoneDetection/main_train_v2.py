@@ -17,14 +17,14 @@ from keras import layers
 # the setting is that there is a microphone sampling audio data at 16000Hz.
 #
 # the data format is in a frame-by-frame manner, with each frame containing
-# 1024 samples.  each sample is an int_16 type, with positive or negative
+# 512 samples.  each sample is an int_16 type, with positive or negative
 # or zero value.
 #
-# the task is to detect whether there is a monotone 200Hz sinusoidal
+# the task is to detect whether there is a monotone 880Hz sinusoidal
 # audio signal in the measured audio
 #
 # -------------------------------------------------
-frameSize = 1024
+frameSize = 512
 sampleFreq = 16000
 
 
@@ -33,7 +33,7 @@ sampleFreq = 16000
 # -------------------------------------------------
 # Detecting monotone sinusoidal signals in audio data is a common task
 # in various applications, such as signal processing and audio analysis.
-# Here, we focus on detecting a 200Hz sinusoidal signal from data sampled
+# Here, we focus on detecting a 880Hz sinusoidal signal from data sampled
 # at 16000Hz using neural networks.
 
 
@@ -41,7 +41,7 @@ sampleFreq = 16000
 # Data Preprocessing
 # -------------------------------------------------
 # To ensure accurate detection, we must preprocess the audio data.
-# Given that each frame contains 1024 samples of int_16 type data,
+# Given that each frame contains 512 samples of int_16 type data,
 # follow these essential preprocessing steps:
 
 # 1. Normalization:
@@ -52,8 +52,8 @@ def normalization_layer(inputFrame):
     return normalizedFrame
 
 # 2. Framing:
-# As each frame contains 1024 samples, it spans approximately 64ms of
-# audio data (1024 samples / 16000Hz). Ensure your data is
+# As each frame contains 512 samples, it spans approximately 64ms of
+# audio data (512 samples / 16000Hz). Ensure your data is
 # well-segmented into frames for consistent processing.
 
 
@@ -61,7 +61,7 @@ def normalization_layer(inputFrame):
 # Feature Extraction
 # -------------------------------------------------
 # Proper feature extraction is necessary for the neural network
-# to effectively detect the 200Hz signal
+# to effectively detect the 880Hz signal
 
 # 1. FFT:
 # Apply FFT to convert time-domain audio data into frequency-domain representations
@@ -138,7 +138,7 @@ def gen_training_data(sampleNum):
     # -------------------------------------------------
 
     # obtain the signal data
-    with open('signals_monotone200Hz.txt', 'r') as fp:
+    with open('signals_monotone880Hz.txt', 'r') as fp:
         lines = [ _.strip() for _ in fp.readlines() ]
 
     # randomly sample sampleNum / 2 entries from signal data
@@ -209,7 +209,7 @@ if __name__ == "__main__":
     # ----------------------------------------
     # TRAINING DATA GENERATION
     # ----------------------------------------
-    SAMPLE_NUM = 5000
+    SAMPLE_NUM = 1600
     x_train, y_train = gen_training_data(SAMPLE_NUM)
     x_train_normalized = x_train / 32768.0
     x_train_fftpsd = np.square(np.abs(np.fft.fft(x_train_normalized, axis=1))) / frameSize
@@ -246,7 +246,7 @@ if __name__ == "__main__":
     # ----------------------------------------
     # MODEL EVALUATION
     # ----------------------------------------
-    x_test, y_test = gen_testing_data(5000)
+    x_test, y_test = gen_testing_data(500)
     x_test_normalized = x_test / 32768.0
     x_test_fftpsd = np.square(np.abs(np.fft.fft(x_test_normalized, axis=1))) / frameSize
     results = model.evaluate(x_test_fftpsd, y_test, )
