@@ -95,6 +95,7 @@ def get_uncompiled_model():
 #            layers.Lambda(psd_layer),
             layers.Dense(128, activation='relu', input_shape=(frameSize,)),
             layers.Dense(64, activation='relu'),
+            layers.Dense(16, activation='relu'),
             layers.Dense(1, activation='sigmoid'),
         ]
     )
@@ -125,6 +126,7 @@ def gen_training_data(sampleNum):
     # obtain the background data
     with open('background.txt' ,'r') as fp:
         lines = [ _.strip() for _ in fp.readlines() ]
+        lines = [ _.replace('NaN', '0') for _ in lines ]
 
     # randomly sample sampleNum / 2 entries from background data
     randSampleIdx_bkgnd = random.sample(range(len(lines)), int(sampleNum/2))
@@ -209,7 +211,7 @@ if __name__ == "__main__":
     # ----------------------------------------
     # TRAINING DATA GENERATION
     # ----------------------------------------
-    SAMPLE_NUM = 1600
+    SAMPLE_NUM = 10000
     x_train, y_train = gen_training_data(SAMPLE_NUM)
     x_train_normalized = x_train / 32768.0
     x_train_fftpsd = np.square(np.abs(np.fft.fft(x_train_normalized, axis=1))) / frameSize
@@ -246,7 +248,7 @@ if __name__ == "__main__":
     # ----------------------------------------
     # MODEL EVALUATION
     # ----------------------------------------
-    x_test, y_test = gen_testing_data(500)
+    x_test, y_test = gen_testing_data(2000)
     x_test_normalized = x_test / 32768.0
     x_test_fftpsd = np.square(np.abs(np.fft.fft(x_test_normalized, axis=1))) / frameSize
     results = model.evaluate(x_test_fftpsd, y_test, )
